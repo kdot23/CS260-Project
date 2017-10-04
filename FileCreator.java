@@ -4,28 +4,25 @@ import java.util.FormatterClosedException;
 import java.util.NoSuchElementException;  
 
 /*
- * Creates files of sizes specified in the arguments (note: size is in megabytes
- * and 1G = 1000 MB)
+ * Creates files of specified sizes by opening, adding data to and closing files
  */
-public class FileCreator
+public class FileCreator 
 {
+	private String size; //size of file to create
+	
 	private static Formatter output; // outputs text to a file 
 	private static final int STRING_SIZE = 1000;
 	private static final int BYTES_PER_MEGABYTE = 1000000;
 	
-	public static void main(String[] args)
+
+	public FileCreator(String size)
 	{
-		for (int i = 0; i < args.length; i++)
-		{
-			openFile(args[i]);
-			addData(args[i]);
-			closeFile();
-		}
+		this.size = size;
 	}
 	       
-	public static void openFile(String argName)
+	public void openFile()
 		{
-			String fileName = "myFile" + argName + ".txt";
+			String fileName = "myFile" + this.size + ".txt";
 			try
 			{
 				output = new Formatter(fileName);
@@ -37,19 +34,17 @@ public class FileCreator
 			}			
 		}
 	
-	public static void addData(String argSize)
+	public void addData()
 	{
-		double size = Double.parseDouble(argSize);
-		System.out.println(size);
+		double size = Double.parseDouble(this.size);
 		String data = "";
 		for (int i = 0; i < STRING_SIZE; i++)
 		{
 			data = data + "a";
 		}
 		
-		for (int i = 0; i < size*BYTES_PER_MEGABYTE / (STRING_SIZE); i ++)
+		for (int i = 0; i < size*BYTES_PER_MEGABYTE / (STRING_SIZE); i++)
 		{
-			System.out.println("ran" + i);
 			try
 			{
 				output.format("%s",data);
@@ -66,7 +61,7 @@ public class FileCreator
 		}
 	}
 	
-	public static void closeFile()
+	public void closeFile()
 	{
 		if (output != null)
 			output.close();
