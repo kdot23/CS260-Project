@@ -6,24 +6,53 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-public class FilePartitioner {
-	private int numParts;
-	private String fileName;
-	private Scanner input;
-	private Formatter output;
-	private double oldSize;
-	private File file;
+/*
+ * This class partitions a given file into equal parts. The method CreatePartition creates a number of files
+ * specified by the user of approximately equally sized files
+ */
+public class FilePartitioner 
+{
+	private String fileName; 	//name of original file
+	private double oldSize;		//size of original file
+	private static Scanner input;	//reads input from original file
+	private Formatter output;		//writes to the new files
 	
-	public FilePartitioner(String fileName, int numParts)
+	/*
+	 * Constructor for FilePartitioner 
+	 * @pararm fileName is the name of the file the user wishes to partition
+	 */
+	public FilePartitioner(String fileName)
 	{
-		this.numParts = numParts;
 		this.fileName = fileName;
-		file = new File(fileName);
-		oldSize = file.length();
+		oldSize = new File(fileName).length();		
+	}
+	
+	/*
+	 * creates a user-specified-number of approximately equally sized files from the original file
+	 *@param numParts number of partitions the user wishes to divide the orignal file into
+	 */
+
+	public void createPartition (int numParts)
+	{
+		int newSize = (int) oldSize / numParts; //size new files should be
+		openOldFile();
+		for (int i = 1; i < numParts + 1; i++)
+		{
+			openNewFile(i);
+			addNewData(newSize);
+			closeNewFile();
+		}
+		closeOldFile();
+		
+	}
+/*
+ * Opens the scanner to read the original file
+ */
+	public void openOldFile()
+	{
 		try
 		{
-		input = new Scanner(Paths.get(fileName));
+			input = new Scanner(Paths.get(fileName));
 		}
 		catch (FileNotFoundException exception)
 		{
@@ -35,26 +64,23 @@ public class FilePartitioner {
 			System.err.println("Error opening file. Terminating.");
 			System.exit(1);
 		}
-		input.useDelimiter("");
-		
-		for (int i = 1; i < numParts + 1; i++)
-		{
-			createPartition(i);
-		}
-		
-		input.close();
-				
+		input.useDelimiter(""); //input.next() normally returns the whole string until whitespace
+								//this makes input.next() return just 1 character
 	}
 	
-	public void createPartition(int p)
+	public void closeOldFile()
 	{
-		openNewFile(p);
-		addNewData();
-		closeNewFile();
+		input.close();
 	}
+	
+	/*
+	 * creates a Formatter to write to the new file
+	 * @param int p the partition identifier
+	 */
 	public void openNewFile(int p)
 	{
-			String newFileName = fileName + "part" + p + ".txt";
+			//use a substring to remove the ".txt" from the original fileName
+			String newFileName = fileName.substring(0, fileName.length()-4) + "part" + p + ".txt";
 			try
 			{
 				output = new Formatter(newFileName);
@@ -67,11 +93,14 @@ public class FilePartitioner {
 			} 
 	}
 	
-	public void addNewData()
+	/*
+	 * Writes data to the file.
+	 * @param int newFileSize is the desired size of the new files (ie: old size/number of parts)
+	 */
+	public void addNewData(int newFileSize)
 	{
-			for (int i = 0; i <  oldSize/ numParts; i++)
+			for (int i = 0; i < newFileSize; i++)
 			{
-				//System.out.println(input.nextByte());
 				try
 				{
 					output.format("%s",input.next());
