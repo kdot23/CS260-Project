@@ -18,7 +18,9 @@ public class EncryptorDriver {
 		System.out.println(f.length());
 		Encryptor e = new Encryptor (key);
 		//byte[][] m = e.createFileMatrix(f);
-		e.encrypt(f, encryptedFileName);
+		e.encrypt(f, encryptedFileName, "encrypt");
+		File ef = new File(encryptedFileName);
+		e.encrypt(ef, decryptedFileName, "decrypt");
 
 		//e.encrypt(originalFile, encryptedFileName);
 		//e.decrypt(encryptFile, decryptedFileName);

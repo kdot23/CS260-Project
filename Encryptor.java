@@ -19,15 +19,27 @@ public class Encryptor {
 			this.key = key;
 		}
 		
-		public void encrypt(File oldFile, String newFileName)
+		public void encrypt(File oldFile, String newFileName, String mode)
 		{
-			byte[][] m = createFileMatrix (oldFile);
-			byte[][] newm = reorderMatrix (m);
+			
 			openNewFile(newFileName);
-			fillEncryptedFile(newm);						
+			byte[][] newM;
+			if (mode == "encrypt")
+			{
+				byte[][] M = createMatrixForEncryption (oldFile);
+				newM = encryptMatrix (M);
+				fillEncryptedFile(newM);
+			}
+			if (mode == "decrypt")
+			{
+				byte[][] M = createMatrixForDecryption (oldFile);
+				newM = decryptMatrix(M);
+				fillEncryptedFile(newM);
+			}
+												
 		}
 		
-		public byte[][] createFileMatrix(File oldFile)
+		public byte[][] createMatrixForEncryption(File oldFile)
 		{			
 			try //open FileInputStream of oldFile
 			{
@@ -43,7 +55,6 @@ public class Encryptor {
 			double size = oldFile.length();
 			int numRows = (int) Math.ceil(size / key.length) + 1; //add one for the key row
 			byte[][] matrix = new byte[numRows][key.length];
-			//System.out.println("numRows = " + numRows);
 			matrix[0] = key;
 			for (int i = 1; i < numRows; i++) //fills all the rows
 			{
@@ -57,23 +68,20 @@ public class Encryptor {
 					System.exit(1);
 				}
 			}
-			
-			/*for (int j = 0; j < matrix[0].length; j++)
+			System.out.println("First matrix");
+			for (int i = 0; i < matrix.length; i++)
 			{
-				while (input.read(matrix[numRows]) != -1)
+				for (int j = 0; j < matrix[0].length; j++)
 				{
-					
+					System.out.printf("%4s",matrix[i][j] + " ");
 				}
+				System.out.println();
 			}
-			int j = 0;
-			while (input.read(matrix[numRows]) != -1)
-			{
-				
-			} */
+			
 			return matrix;			
 		}
 		
-		public byte[][] reorderMatrix(byte[][] M)
+		public byte[][] encryptMatrix(byte[][] M)
 		{
 			ArrayList<Integer> keyList = new ArrayList<Integer>();
 			for (int i = 0; i < key.length; i++)
@@ -86,11 +94,124 @@ public class Encryptor {
 			byte[][] newMatrix = new byte[M[0].length][M.length];
 			for (int k = 0; k < keyList.size(); k++)
 			{
-				//System.out.println("k loop " + k);
 				for (int j = 0; j < M[0].length; j++)
 				{
-					//System.out.println("M[0] loop " + j);
+					if (keyList.get(k) == M[0][j])
+					{
+						byte[] babyArray = new byte[M.length - 1];
+						for (int i = 1; i < M.length; i++ )
+						{
+							babyArray[i-1] = M[i][j];
+						}
 
+					newMatrix[k] = babyArray;
+					}
+				}
+						
+			}
+			System.out.println("Encrypted matrix");
+			for (int i = 0; i < newMatrix.length; i++)
+			{
+				for (int j = 0; j < newMatrix[0].length; j++)
+				{
+					System.out.printf("%4s",newMatrix[i][j] + " ");
+				}
+				System.out.println();
+			}
+
+			return newMatrix;
+		}
+		public byte[][] createMatrixForDecryption(File oldFile)
+		{			
+			try //open FileInputStream of oldFile
+			{
+				input = new FileInputStream(oldFile);
+			}
+			catch (FileNotFoundException exception)
+			{
+				System.err.println("Error opening file. Try a different file name:");
+				System.exit(1);
+			}
+			
+			//fill a matrix of the correct size
+			double size = oldFile.length();
+			int numCols = (int) Math.ceil(size / key.length); //add one for the key row
+			byte[][] matrix = new byte[key.length][numCols];
+			
+			for (int i = 0; i < key.length; i++) //fills all the rows
+			{
+				try
+				{
+					input.read(matrix[i], 0, numCols);
+				}
+				catch (IOException exception)
+				{
+					System.err.println("Error adding data to file. Terminating.");
+					System.exit(1);
+				}
+			}
+			System.out.println("2nd read in matrix");
+			for (int i = 0; i < matrix.length; i++)
+			{
+				for (int j = 0; j < matrix[0].length; j++)
+				{
+					System.out.printf("%4s",matrix[i][j] + " ");
+				}
+				System.out.println();
+			}
+			
+			return matrix;			
+		}
+		
+		public byte[][] decryptMatrix(byte[][] M)
+		{ 
+			ArrayList<Integer> keyList = new ArrayList<Integer>();
+			for (int i = 0; i < key.length; i++)
+			{
+				Integer k = (Integer) (int) key[i];
+				keyList.add(k);
+			}
+			byte[][] newMatrix = new byte[M[0].length][M.length];
+			for (int j = 0; j < M.length; j++)
+			{
+				int newIndex = keyList.indexOf((int) j);
+				for (int i = 0; i < M[0].length; i++)
+				{
+					newMatrix[i][newIndex] = M[j][i];
+				}
+			}
+			
+/*
+			byte[][] newMatrix = new byte[M[0].length-1][M.length];
+			for (int i = 0; i < M.length; i++)
+			{
+				int newIndex = key[i];
+				byte[] babyArray = new byte[newMatrix[0].length];
+				for (int j = 1; j < M[0].length; j++ )
+				{
+					babyArray[j-1] = M[i][j];
+				}
+				for (int k = 0; k < newMatrix.length; k++)
+				{
+					newMatrix[k][newIndex] = babyArray[k];
+				}
+				
+			} */
+			System.out.println("Decrypted matrix");
+			for (int i = 0; i < newMatrix.length; i++)
+			{
+				for (int j = 0; j < newMatrix[0].length; j++)
+				{
+					System.out.printf("%4s",newMatrix[i][j] + " ");
+				}
+				System.out.println();
+			}
+			
+			/*byte[][] newMatrix = new byte[M[0].length][M.length];
+			for (int k = 0; k < keyList.size(); k++)
+			{
+				for (int j = 0; j < M[0].length; j++)
+				{
 					if (keyList.get(k) == M[0][j])
 					{
 						System.out.println("j val = "  + j);
@@ -106,19 +227,12 @@ public class Encryptor {
 
 					newMatrix[k] = babyArray;
 					}
-				}
+				} 
 						
-			}
-			for (int i = 0; i < newMatrix.length; i++)
-			{
-				for (int j =0; j < newMatrix[0].length; j++)
-				{
-					System.out.println(newMatrix[i][j]);
-				}
-			}
+			} */
+
 			return newMatrix;
 		}
-		
 		public void fillEncryptedFile(byte[][] M)
 		{
 			for (int i = 0; i < M.length; i++)
@@ -145,53 +259,14 @@ public class Encryptor {
 				}
 			}
 		}
-		/*
-			ArrayList<Integer> keyList = new ArrayList<Integer>();
-			for (int i = 0; i < key.length; i++)
-			{
-				Integer k = (Integer) (int) key[i];
-				keyList.add(k);
-			}
-			Collections.sort(keyList);
-			System.out.println("keyList:" + keyList.size() + " M[0]:" + M[0].length + " M:" + M.length);
-			for (int k = 0; k < keyList.size(); k++)
-			{
-				System.out.println("k loop " + k);
-				for (int i = 0; i < M[0].length; i++)
-				{
-					System.out.println("M[0] loop " + i);
 
-					if (keyList.get(k) == M[0][i])
-					{
-						System.out.println("i val = "  + i);
-						for (int j = 1; j < M.length; j++ )
-						{
-							System.out.println("M loop " + j);
-
-							try
-							{
-								output.write(M[j][i]);
-							}
-							catch (IOException exception)
-							{
-								System.err.println("Error adding data to file. Terminating.");
-								System.exit(1);
-							}							
-						}
-						break;
-					}
-				}
-			}
-			
-		} */
 
 		public void openNewFile(String name)
 		{
 				try
 				{
 					output = new FileOutputStream(name);
-				}
-				
+				}				
 				catch (FileNotFoundException fileNotFoundException)
 				{
 					System.err.println("Error opening file. Terminating.");
