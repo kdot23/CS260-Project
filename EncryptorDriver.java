@@ -1,7 +1,5 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileOutputStream;
 import java.util.Formatter;
 
 public class EncryptorDriver {
@@ -15,15 +13,11 @@ public class EncryptorDriver {
 	public static void main(String[] args) 
 	{
 		File f = makeOriginalFile(ORIGINAL_STRING);	
-		System.out.println(f.length());
-		Encryptor e = new Encryptor (key);
-		//byte[][] m = e.createFileMatrix(f);
-		e.encrypt(f, encryptedFileName, "encrypt");
-		File ef = new File(encryptedFileName);
-		e.encrypt(ef, decryptedFileName, "decrypt");
 
-		//e.encrypt(originalFile, encryptedFileName);
-		//e.decrypt(encryptFile, decryptedFileName);
+		Encryptor e = new Encryptor (key);
+		e.encrypt(f, encryptedFileName);
+		File encrypted = new File(encryptedFileName);
+		e.decrypt(encrypted, decryptedFileName);
 
 	}
 	

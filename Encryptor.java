@@ -7,7 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.Math;
 
-
+/*
+ * This class encrypts code using a row transposition technique. The Encryptor is constructed 
+ * by a key of integers. The program creates a matrix that has the same number of columns as
+ * the key and reads the file into that matrix row by row. The columns of the matrix are reconfigured 
+ * so that the key (first row) is in ascending order. Then the characters are read column by column
+ * to form the encrypted text.
+ * 
+ */
 public class Encryptor {
 	private byte[] key;
 	private static FileInputStream input;
@@ -19,25 +26,21 @@ public class Encryptor {
 			this.key = key;
 		}
 		
-		public void encrypt(File oldFile, String newFileName, String mode)
-		{
-			
-			openNewFile(newFileName);
-			byte[][] newM;
-			if (mode == "encrypt")
-			{
-				byte[][] M = createMatrixForEncryption (oldFile);
-				newM = encryptMatrix (M);
-				fillEncryptedFile(newM);
-			}
-			if (mode == "decrypt")
-			{
-				byte[][] M = createMatrixForDecryption (oldFile);
-				newM = decryptMatrix(M);
-				fillEncryptedFile(newM);
-			}
-												
+		public void encrypt(File oldFile, String newFileName)
+		{			
+			openNewFile(newFileName);			
+			byte[][] M = createMatrixForEncryption (oldFile);
+			byte[][] newM = encryptMatrix (M);
+			fillEncryptedFile(newM);
 		}
+		public void decrypt(File oldFile, String newFileName)
+		{			
+			openNewFile(newFileName);			
+			byte[][] M = createMatrixForDecryption (oldFile);
+			byte[][] newM = decryptMatrix (M);
+			fillEncryptedFile(newM);
+		}
+		
 		
 		public byte[][] createMatrixForEncryption(File oldFile)
 		{			
@@ -67,22 +70,15 @@ public class Encryptor {
 					System.err.println("Error adding data to file. Terminating.");
 					System.exit(1);
 				}
-			}
-			System.out.println("First matrix");
-			for (int i = 0; i < matrix.length; i++)
-			{
-				for (int j = 0; j < matrix[0].length; j++)
-				{
-					System.out.printf("%4s",matrix[i][j] + " ");
-				}
-				System.out.println();
-			}
+			}	
 			
 			return matrix;			
+						
 		}
 		
 		public byte[][] encryptMatrix(byte[][] M)
 		{
+			//Makes an ArrayList of key so that it can be sorted
 			ArrayList<Integer> keyList = new ArrayList<Integer>();
 			for (int i = 0; i < key.length; i++)
 			{
@@ -91,36 +87,34 @@ public class Encryptor {
 			}
 			Collections.sort(keyList);
 			
-			byte[][] newMatrix = new byte[M[0].length][M.length];
+			//new Matrix has inverse dimensions for easy reading
+			byte[][] newMatrix = new byte[M[0].length][M.length]; 
+			
+			//Sorting the columns so the key is in ascending order
 			for (int k = 0; k < keyList.size(); k++)
 			{
+				//find the column which has the key element, k
 				for (int j = 0; j < M[0].length; j++)
-				{
+				{ 
 					if (keyList.get(k) == M[0][j])
 					{
+						//makes an array of the correct column
 						byte[] babyArray = new byte[M.length - 1];
 						for (int i = 1; i < M.length; i++ )
 						{
 							babyArray[i-1] = M[i][j];
 						}
-
+						//places babyArray in the kth row of the new matrix
 					newMatrix[k] = babyArray;
 					}
 				}
 						
 			}
-			System.out.println("Encrypted matrix");
-			for (int i = 0; i < newMatrix.length; i++)
-			{
-				for (int j = 0; j < newMatrix[0].length; j++)
-				{
-					System.out.printf("%4s",newMatrix[i][j] + " ");
-				}
-				System.out.println();
-			}
 
 			return newMatrix;
 		}
+		
+		//creates a file with the inverse dimensions as the matrix for encryption
 		public byte[][] createMatrixForDecryption(File oldFile)
 		{			
 			try //open FileInputStream of oldFile
@@ -133,9 +127,8 @@ public class Encryptor {
 				System.exit(1);
 			}
 			
-			//fill a matrix of the correct size
 			double size = oldFile.length();
-			int numCols = (int) Math.ceil(size / key.length); //add one for the key row
+			int numCols = (int) Math.ceil(size / key.length); 
 			byte[][] matrix = new byte[key.length][numCols];
 			
 			for (int i = 0; i < key.length; i++) //fills all the rows
@@ -150,27 +143,20 @@ public class Encryptor {
 					System.exit(1);
 				}
 			}
-			System.out.println("2nd read in matrix");
-			for (int i = 0; i < matrix.length; i++)
-			{
-				for (int j = 0; j < matrix[0].length; j++)
-				{
-					System.out.printf("%4s",matrix[i][j] + " ");
-				}
-				System.out.println();
-			}
-			
+
 			return matrix;			
 		}
 		
 		public byte[][] decryptMatrix(byte[][] M)
 		{ 
+			//create an ArrayList to use indexOf() method
 			ArrayList<Integer> keyList = new ArrayList<Integer>();
 			for (int i = 0; i < key.length; i++)
 			{
 				Integer k = (Integer) (int) key[i];
 				keyList.add(k);
 			}
+			
 			byte[][] newMatrix = new byte[M[0].length][M.length];
 			for (int j = 0; j < M.length; j++)
 			{
@@ -180,57 +166,6 @@ public class Encryptor {
 					newMatrix[i][newIndex] = M[j][i];
 				}
 			}
-			
-/*
-			byte[][] newMatrix = new byte[M[0].length-1][M.length];
-			for (int i = 0; i < M.length; i++)
-			{
-				int newIndex = key[i];
-				byte[] babyArray = new byte[newMatrix[0].length];
-				for (int j = 1; j < M[0].length; j++ )
-				{
-					babyArray[j-1] = M[i][j];
-				}
-				for (int k = 0; k < newMatrix.length; k++)
-				{
-					newMatrix[k][newIndex] = babyArray[k];
-				}
-				
-			} */
-			System.out.println("Decrypted matrix");
-			for (int i = 0; i < newMatrix.length; i++)
-			{
-				for (int j = 0; j < newMatrix[0].length; j++)
-				{
-					System.out.printf("%4s",newMatrix[i][j] + " ");
-				}
-				System.out.println();
-			}
-			
-			/*byte[][] newMatrix = new byte[M[0].length][M.length];
-			for (int k = 0; k < keyList.size(); k++)
-			{
-				for (int j = 0; j < M[0].length; j++)
-				{
-					if (keyList.get(k) == M[0][j])
-					{
-						System.out.println("j val = "  + j);
-						byte[] babyArray = new byte[M.length - 1];
-						for (int i = 1; i < M.length; i++ )
-						{
-							babyArray[i-1] = M[i][j];
-						}
-						for (int g = 0; g < babyArray.length; g++)
-						{
-							System.out.println(babyArray[g]);
-						}
-
-					newMatrix[k] = babyArray;
-					}
-				} 
-						
-			} */
-
 			return newMatrix;
 		}
 		public void fillEncryptedFile(byte[][] M)
@@ -247,7 +182,7 @@ public class Encryptor {
 						}
 						else
 						{
-							output.write(32);
+							output.write(32); //writes a space, if the element was null
 						}
 						
 					}
@@ -272,12 +207,7 @@ public class Encryptor {
 					System.err.println("Error opening file. Terminating.");
 					System.exit(1);
 				} 
-		}
-			
-			
-		
-
-		
+		}		
 }
 
 
