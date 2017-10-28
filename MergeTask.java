@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.io.File;
 
 public class MergeTask implements Runnable 
-{
-	
+{	
 	private File oldFile;
 	private File newFile;
 	private static FileInputStream input; //reads input from original file
@@ -21,26 +20,15 @@ public class MergeTask implements Runnable
 	}
 	
 	//reads data from the specified old file and appends it to the new file
-	synchronized public void run() 
+	public void run() 
 	{
 		openOldFile(oldFile);
 		long oldSize = oldFile.length();
 		
 		openNewFile(newFile);
 		
-		while (oldSize > 0)
-		{
-			if (oldSize > MAX_INTEGER) //if the oldSize can't be properly parsed to an int
-			{
-				addNewData(MAX_INTEGER); //add max number of data to file, and then repeat loop
-			}
-			else
-			{
-				addNewData((int) oldSize);
-			}
-			oldSize = oldSize - MAX_INTEGER;
-		}
-		
+		addNewData(oldSize);
+				
 		closeNewFile();
 		closeOldFile();		
 	}
@@ -76,15 +64,13 @@ public class MergeTask implements Runnable
 		
 		/*
 		 * Creates a FileOutputStream to write to the new file
-		 * @param int p the partition identifier
+		 * @param File is the newFile where the merged data will go
 		 */
-		public void openNewFile(File file)
+		public void openNewFile(File newFile)
 		{
-				//use a substring to remove the ".txt" from the original fileName
-				//String newFileName = oldFileName.substring(0, oldFileName.length()-4) + "part" + p + ".txt";
 				try
 				{
-					output = new FileOutputStream(file, true);
+					output = new FileOutputStream(newFile, true);
 				}
 				
 				catch (FileNotFoundException fileNotFoundException)
@@ -108,23 +94,39 @@ public class MergeTask implements Runnable
 			}
 		}
 	
-	public void addNewData(int oldFileSize)
+	public void addNewData(long oldFileSize)
 	{
-		try
+		int size;
+		while (oldFileSize > 0)
 		{
-			byte[] dataArray = new byte[oldFileSize];
-			input.read(dataArray, 0, oldFileSize); //fills the dataArray with buffered characters
-												//starts at the 0 position and adds oldFileSize number of bytes
-			output.write(dataArray); //writes the contents of dataArray to output (FileOutputStream)
-			System.out.println("Writing data from " + oldFile.getName());
-		}
+			if (oldFileSize > MAX_INTEGER) //if the oldSize can't be properly parsed to an int
+			{
+				size = MAX_INTEGER;  //add max number of data to file, and then repeat loop				
+			}
+			else
+			{
+				size = (int) oldFileSize;
+			}
 			
-		catch (IOException exception)
-		{
-			System.err.println("Error adding data to file. Terminating.");
-			System.exit(1);
+			oldFileSize = oldFileSize - MAX_INTEGER;
+		
+			try
+			{
+				byte[] dataArray = new byte[size];
+				input.read(dataArray, 0, size); //fills the dataArray with buffered characters
+												//starts at the 0 position and adds oldFileSize number of bytes
+				output.write(dataArray); //writes the contents of dataArray to output (FileOutputStream)
+			}
+			
+			catch (IOException exception)
+			{
+				System.err.println("Error adding data to file. Terminating.");
+				System.exit(1);
+			}
 		}
 			
 	}
+	
+	
 
 }
