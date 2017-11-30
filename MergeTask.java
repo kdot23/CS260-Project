@@ -57,7 +57,7 @@ public class MergeTask implements Runnable
 			}
 			catch (IOException exception)
 			{
-				System.err.println("Error opening file. Terminating.");
+				System.err.println("Error closing input file. Terminating.");
 				System.exit(1);
 			}
 		}
