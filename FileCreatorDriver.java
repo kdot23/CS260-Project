@@ -1,5 +1,5 @@
 /*
- * Driver class for the FileCreator. The user can specify the sizes of the 
+ * Driver class for the FileCreator. The user can specify the sizes in megabytes of the 
  * desired files by adding them to the arguments
  */
 public class FileCreatorDriver {

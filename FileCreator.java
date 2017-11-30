@@ -1,7 +1,8 @@
 import java.io.FileNotFoundException;            
 import java.util.Formatter;               
 import java.util.FormatterClosedException;
-import java.util.NoSuchElementException;  
+import java.util.NoSuchElementException; 
+import java.util.Random;
 
 /*
  * Creates files of specified sizes by opening, adding data to and closing files
@@ -12,7 +13,10 @@ public class FileCreator
 	
 	private static Formatter output; // outputs text to a file 
 	private static final int STRING_SIZE = 1000;
-	private static final int BYTES_PER_MEGABYTE = 1000000;
+	private static final int BYTES_PER_MEGABYTE = 1_000_000;
+	
+	private static String alphabet = "abcdefghijklmnopqrstuvwxyz";
+	
 	
 
 	public FileCreator(String size)
@@ -37,14 +41,18 @@ public class FileCreator
 	public void addData()
 	{
 		double size = Double.parseDouble(this.size);
-		String data = "";
-		for (int i = 0; i < STRING_SIZE; i++)
-		{
-			data = data + "a";
-		}
 		
 		for (int i = 0; i < size*BYTES_PER_MEGABYTE / (STRING_SIZE); i++)
 		{
+			String data = "";
+			Random r = new Random();
+			char c = alphabet.charAt(r.nextInt(alphabet.length()));
+			for (int j = 0; j < STRING_SIZE; j++)
+			{
+				
+				data = data + c;
+			}
+			
 			try
 			{
 				output.format("%s",data);

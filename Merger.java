@@ -22,7 +22,7 @@ public class Merger
 		{
 			System.out.println("Error creating empty file");
 		}
-		 		
+		//singleThreadExecutor is used so that threads are executed in order	
 		ExecutorService executorService = Executors.newSingleThreadExecutor();		
 		
 		for (int i = 1; i <= 5; i++)

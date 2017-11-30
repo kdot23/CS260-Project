@@ -12,11 +12,9 @@ public class FilePartitioner
 	private File oldFile; 	//original file
 	private String oldFileName; //name of original file
 	private double oldSize;		//size of original file
-	//private static Scanner input;	//reads input from original file
-	private static FileInputStream input;
-	//private Formatter output;		//writes to the new files
-	private FileOutputStream output;
-	private static int MAX_INTEGER = 429496729;
+	private static FileInputStream input; //reads input from original file
+	private FileOutputStream output; //writes output to new files
+	private static final int MAX_INTEGER = 429496729; //max size of integer in java (if int is stored as 1 byte)
 	
 	/*
 	 * Constructor for FilePartitioner 
@@ -30,7 +28,7 @@ public class FilePartitioner
 	}
 	
 	/*
-	 * creates a user-specified-number of approximately equally sized files from the original file
+	 * Creates a user-specified-number of approximately equally sized files from the original file
 	 *@param numParts number of partitions the user wishes to divide the original file into
 	 */
 
@@ -63,7 +61,7 @@ public class FilePartitioner
 	}
 	
 /*
- * Opens the scanner to read the original file
+ * Opens the FileInputReader to read the original file
  */
 	public void openOldFile()
 	{
@@ -92,7 +90,7 @@ public class FilePartitioner
 	}
 	
 	/*
-	 * creates a Formatter to write to the new file
+	 * Creates a FileOutputStream to write to the new file
 	 * @param int p the partition identifier
 	 */
 	public void openNewFile(int p)
